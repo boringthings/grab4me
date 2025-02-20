@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <Authors>boringthings</Authors>
+    <Description>Grab script output or files and serve as REST.</Description>
+    <PackageId>Grab4Me</PackageId>
+    <Version>0.0.0-0</Version>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+</Project>
