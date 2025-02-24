@@ -13,7 +13,7 @@ public class Program
         app.MapGet("/{*path}", (string path) => $"Hello {path}!"); // TODO get the resource
 
 
-        app.Run("http://*:5000");
+        app.Run("http://*:59000");
 
         return 0;
     }
