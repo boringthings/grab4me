@@ -5,16 +5,16 @@ using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Razor.Runtime.TagHelpers;
-using Microsoft.VisualBasic;
 
 internal class ResourceManager : IResourceManager
 {
     private IFileLocator _fileLocator;
+    private IFileRunner _fileRunner;
 
-    public ResourceManager(IFileLocator fileLocator)
+    public ResourceManager(IFileLocator fileLocator, IFileRunner fileRunner)
     {
         _fileLocator = fileLocator;
+        _fileRunner = fileRunner;
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ internal class ResourceManager : IResourceManager
     /// <returns>A new instance of <see cref="JsonDocument"/>.</returns>
     /// <exception cref="FileNotFoundException">Thrown when the resource is not found.</exception>
     /// <exception cref="NotSupportedException">Thrown when the resource is not supported.</exception>
-    public async Task<JsonDocument?> GetResource(string path, CancellationToken cancellationToken)
+    public async Task<JsonDocument> GetResourceAsync(string path, CancellationToken cancellationToken)
     {
         FileSystemInfo fileInfo = _fileLocator.Locate(path);
 
@@ -32,26 +32,23 @@ internal class ResourceManager : IResourceManager
         {
             // TODO: Execute the file and return the output
             return await _fileRunner.RunAsync(fileInfo.FullName, cancellationToken); 
-            throw new NotImplementedException();
         }
 
         if (true) // TODO: Check if file is text or binary
         {
-            return await JsonDocument.ParseAsync(File.ReadAllText(fileInfo.FullName), cancellationToken);
+            return JsonDocument.Parse(File.ReadAllText(fileInfo.FullName));
         }
 
         throw new NotSupportedException("Directories are not supported.");
     }
 }
 
-internal interface IResourceManager
+internal interface IFileRunner
 {
-    /// <summary>
-    /// Gets the content of resource at given path.
-    /// </summary>
-    /// <param name="path"></param>
-    /// <returns>A new instance of <see cref="JsonDocument"/>.</returns>
-    /// <exception cref="FileNotFoundException">Thrown when the resource is not found.</exception>
-    /// <exception cref="NotSupportedException">Thrown when the resource is not supported.</exception>
-    JsonDocument GetResource(string path);
+    Task<JsonDocument> RunAsync(string path, CancellationToken cancellationToken);
+}
+
+internal interface IFileLocator
+{
+    FileSystemInfo Locate(string path);
 }
