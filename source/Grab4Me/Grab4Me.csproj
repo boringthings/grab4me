@@ -8,6 +8,7 @@
     <PackageId>Grab4Me</PackageId>
     <Version>0.0.0-0</Version>
     <OutputType>Exe</OutputType>
+    <AssemblyName>grab4me</AssemblyName>
   </PropertyGroup>
 
 </Project>
