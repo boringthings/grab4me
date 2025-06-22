@@ -23,7 +23,7 @@ public class Program
             {
                 var resourceFinder = resourceFinderFactory.Create(path);
                 var resource = await resourceFinder.FindResourceAsync();
-                return Results.Ok(resource);
+                return Results.Ok(resource.Value);
             }
             catch (Exception ex)
             {

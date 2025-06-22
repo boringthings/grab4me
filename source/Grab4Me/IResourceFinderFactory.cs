@@ -9,5 +9,5 @@ internal interface IResourceFinderFactory
 
 internal interface IResourceFinder
 {
-    Task<Resource<T>> FindResourceAsync();
+    Task<Resource> FindResourceAsync();
 }
