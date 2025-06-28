@@ -7,5 +7,5 @@ internal interface IResourceGetter
 {
     FilePath Path { get; }
 
-    Task<Resource> GetResourceAsync(CancellationToken cancellationToken = default);
+    Task<Resource> GetResourceAsync(CancellationToken cancellationToken);
 }

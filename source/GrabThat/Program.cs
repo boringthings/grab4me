@@ -1,7 +1,10 @@
 namespace GrabThat;
 
 using System;
+using System.IO;
+using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
@@ -20,7 +23,7 @@ public class Program
                 => await Results.Problem()
                              .ExecuteAsync(context)));
 
-        app.MapGet("/", () =>
+        app.MapGet("/", (HttpRequest request, CancellationToken cancellationToken) =>
         {
             // List all available resources.
             var rootPath = resourceGetterFactory.RootPath;
@@ -30,14 +33,20 @@ public class Program
             }
             return Results.Ok(
                 Directory.GetFiles(rootPath, "*", SearchOption.AllDirectories)
-                    .Select(filePath => filePath.Replace(rootPath, string.Empty)));
+                    .Select(filePath =>
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        var path = Path.GetRelativePath(rootPath, filePath);
+                        path = Path.Combine(request.PathBase, path);
+                        return request.Host + path;
+                    }));
         }); 
-        app.MapGet("/{*path}", async (string path) =>
+        app.MapGet("/{*path}", async (string path, CancellationToken cancellationToken) =>
         {
             try
             {
                 var resourceGetter = resourceGetterFactory.Create(path);
-                var resource = await resourceGetter.GetResourceAsync();
+                var resource = await resourceGetter.GetResourceAsync(cancellationToken);
                 return Results.Ok(resource.Value);
             }
             catch (Exception ex)

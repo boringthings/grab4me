@@ -15,14 +15,16 @@ internal class ResourceGetterFactory : IResourceGetterFactory
         {
             throw new DirectoryNotFoundException($"The directory '{path}' does not exist.");
         }
-        _rootPath = new FilePath(path);
+        RootPath = new FilePath(path);
     }
+
+    internal FilePath RootPath { get; init; }
 
     public IResourceGetter Create(FilePath relativePath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(relativePath);
 
-        FilePath resourcePath = Path.Combine(_rootPath, relativePath);
+        FilePath resourcePath = Path.Combine(RootPath, relativePath);
         if (!File.Exists(resourcePath))
         {
             throw new FileNotFoundException($"The file '{resourcePath}' does not exist.");
@@ -36,6 +38,4 @@ internal class ResourceGetterFactory : IResourceGetterFactory
 
         return new JsonFileResourceGetter(resourcePath);
     }
-
-    private readonly FilePath _rootPath;
 }

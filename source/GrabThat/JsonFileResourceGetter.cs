@@ -13,7 +13,7 @@ internal class JsonFileResourceGetter : ResourceGetter
     {
     }
 
-    public override async Task<Resource> GetResourceAsync(CancellationToken cancellationToken = default)
+    public override async Task<Resource> GetResourceAsync(CancellationToken cancellationToken)
     {
         if (!File.Exists(Path))
         {
