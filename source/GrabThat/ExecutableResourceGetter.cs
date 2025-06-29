@@ -1,7 +1,8 @@
-
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,14 +12,14 @@ internal class ExecutableResourceGetter : ResourceGetter
 {
     internal ExecutableResourceGetter(FilePath path) : base(path) { }
 
-    public override Task<Resource> GetResourceAsync(CancellationToken _)
+    public override async Task<Resource> GetResourceAsync(CancellationToken cancellationToken)
     {
         if (!File.Exists(Path))
         {
             throw new FileNotFoundException($"The file '{Path}' does not exist.");
         }
 
-        var process = new Process
+        using var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
@@ -28,38 +29,24 @@ internal class ExecutableResourceGetter : ResourceGetter
             },
             EnableRaisingEvents = true
         };
-
-        var tcs = new TaskCompletionSource<Resource>();
-
-        process.Exited += (sender, args) =>
+       
+        using var _ = cancellationToken.Register(() =>
         {
-            if (process.ExitCode != 0)
+            if (!process.HasExited)
             {
-                tcs.SetException(
-                    new InvalidOperationException(
-                        $"{System.IO.Path.GetFileNameWithoutExtension(Path)} exited with code {process.ExitCode}."));
-                return;
+                process.Kill();
             }
-            try
-            {
-                var output = process.StandardOutput.ReadToEnd();
-                tcs.SetResult(new Resource(output));
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-            }
-        };
+        });
 
-        try
+        process.Start();            
+        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        if (process.ExitCode != 0)
         {
-            process.Start();
+            throw new InvalidOperationException($"The executable '{Path}' exited with code {process.ExitCode}.");
         }
-        catch (Exception ex)
-        {
-            tcs.SetException(ex);
-        }
-    
-        return tcs.Task;
-    }
+
+        var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+        var content = JsonSerializer.Deserialize<JsonNode>(output, DefaultJsonSerializerOptions);
+        return new Resource(content);
+    } 
 }

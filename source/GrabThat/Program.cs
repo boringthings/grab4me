@@ -37,7 +37,7 @@ public class Program
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         var path = Path.GetRelativePath(rootPath, filePath);
-                        path = Path.Combine(request.PathBase, path);
+                        path = Path.Combine("/" + request.PathBase, path);
                         return request.Host + path;
                     }));
         }); 

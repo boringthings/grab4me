@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System;
+using System.Text.Json.Nodes;
 
 internal class JsonFileResourceGetter : ResourceGetter
 {
@@ -24,7 +25,7 @@ internal class JsonFileResourceGetter : ResourceGetter
         {
             await using var stream = File.OpenRead(Path);
             var content =
-                await JsonSerializer.DeserializeAsync<object>(stream, cancellationToken: cancellationToken);
+                await JsonSerializer.DeserializeAsync<JsonNode>(stream, DefaultJsonSerializerOptions, cancellationToken);
             return new Resource(content);
         }
         catch (Exception ex)
