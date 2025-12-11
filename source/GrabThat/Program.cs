@@ -1,3 +1,6 @@
+// Copyright (c) 2025
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 namespace GrabThat;
 
 using System;
@@ -12,7 +15,6 @@ using Microsoft.AspNetCore.Http;
 public class Program
 {
     public const string AppName = "grabthat";
-
     public static int Main(string[] args)
     {
         var resourceGetterFactory = new ResourceGetterFactory();
@@ -40,7 +42,7 @@ public class Program
                         path = Path.Combine("/" + request.PathBase, path);
                         return request.Host + path;
                     }));
-        }); 
+        });
         app.MapGet("/{*path}", async (string path, CancellationToken cancellationToken) =>
         {
             try

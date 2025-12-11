@@ -1,3 +1,6 @@
+// Copyright (c) 2025
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -19,18 +22,17 @@ internal class ExecutableResourceGetter : ResourceGetter
             throw new FileNotFoundException($"The file '{Path}' does not exist.");
         }
 
-        using var process = new Process
+        using var process = new Process();
+        process.StartInfo = new ProcessStartInfo
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = Path,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            },
-            EnableRaisingEvents = true
+            FileName = Path,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true
         };
-       
-        using var _ = cancellationToken.Register(() =>
+        process.EnableRaisingEvents = true;
+
+        await using var _ = cancellationToken.Register(() =>
         {
             if (!process.HasExited)
             {
@@ -38,7 +40,7 @@ internal class ExecutableResourceGetter : ResourceGetter
             }
         });
 
-        process.Start();            
+        process.Start();
         await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
         if (process.ExitCode != 0)
         {
@@ -48,5 +50,5 @@ internal class ExecutableResourceGetter : ResourceGetter
         var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
         var content = JsonSerializer.Deserialize<JsonNode>(output, DefaultJsonSerializerOptions);
         return new Resource(content);
-    } 
+    }
 }

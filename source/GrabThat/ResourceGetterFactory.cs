@@ -1,3 +1,6 @@
+// Copyright (c) 2025
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 namespace GrabThat;
 
 using System;
@@ -30,8 +33,8 @@ internal class ResourceGetterFactory : IResourceGetterFactory
             throw new FileNotFoundException($"The file '{resourcePath}' does not exist.");
         }
 
-        if (File.GetUnixFileMode(resourcePath)
-            == (UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute))
+        var fileMode = File.GetUnixFileMode(resourcePath);
+        if ((fileMode & UnixFileMode.UserExecute) != 0)
         {
             return new ExecutableResourceGetter(resourcePath);
         }
